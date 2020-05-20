@@ -16,7 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class MainActivity extends AppCompatActivity
 {
-    Button next, signInPage, dashboard, register, discover, payment, profile, postDetails, historyButton;
+    Button next, signInPage, dashboard, register, discover, payment, profile, postDetails, historyButton, onboardingButton, splash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,6 +44,17 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, SendLocationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        splash = findViewById(R.id.splash);
+        splash.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, SplashActivity.class);
                 startActivity(intent);
             }
         });
@@ -77,6 +88,17 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v)
             {
                 Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        onboardingButton = findViewById(R.id.onboardingButton);
+        onboardingButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, OnboardingActivity.class);
                 startActivity(intent);
             }
         });

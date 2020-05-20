@@ -299,14 +299,23 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@drawable/rounded"
-        app:itemIconTint="@color/nav_color"
-        app:itemTextColor="@color/nav_color"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/menu" />
+        <me.ibrahimsn.lib.SmoothBottomBar
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:backgroundColor="#fff"
+            app:indicatorColor="@android:color/black"
+            app:iconTint="@android:color/holo_red_dark"
+            android:layout_alignParentBottom="true"
+            app:menu="@menu/menu"/>
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bottomNavigationView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="70dp"-->
+<!--        android:background="@drawable/rounded"-->
+<!--        app:itemIconTint="@color/nav_color"-->
+<!--        app:itemTextColor="@color/nav_color"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        app:menu="@menu/menu" />-->
     </RelativeLayout>
 </LinearLayout>
