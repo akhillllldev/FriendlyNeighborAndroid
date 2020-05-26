@@ -34,4 +34,7 @@
     <string name="menu_dashboard">Dashboard</string>
     <string name="menu_editprofile">Profile</string>
     <string name="menu_notifications">Notifications</string>
+    <string name="default_channel_description">Requests nearby</string>
+    <string name="default_channel_name">DiscoveryNotifications</string>
+    <string name="notification_channel_id">FN_Notification_Base</string>
 </resources>
