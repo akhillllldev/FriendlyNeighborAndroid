@@ -1,22 +1,19 @@
 package me.twodee.friendlyneighbor;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -27,9 +24,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.card.MaterialCardView;
-import com.google.gson.JsonObject;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
+import com.ibm.mobilefirstplatform.clientsdk.android.push.api.*;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,18 +40,22 @@ public class DashboardActivity extends AppCompatActivity {
     TextView nameTV, emailTV;
     LinearLayout editProfileButton;
 
-    MaterialCardView RequestPage,DiscoverPage,KarmaPage, RespondToPosts;
+    MaterialCardView RequestPage, DiscoverPage, KarmaPage, RespondToPosts;
     CardView myProfile;
     String personName, personEmail;
     ImageView displayImage;
 
     SharedPreferences preferences;
 
+    private MFPPush push; // Push client
+    private MFPPushNotificationListener notificationListener; // Notification listener to handle a push sent to the phone
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+                             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         setContentView(R.layout.activity_dashboard);
         sign_out = findViewById(R.id.sign_out_button);
@@ -72,6 +73,12 @@ public class DashboardActivity extends AppCompatActivity {
         preferences = getSharedPreferences("UserDetails", MODE_PRIVATE);
 
         fetchData();
+
+        initNotifications();
+        registerNotifications(preferences.getString("_id", null));
+        notificationListener = createNotificationListener();
+        push.listen(notificationListener);
+
         editProfileButton.setOnClickListener(v -> {
             Intent intent = new Intent(getBaseContext(), EditProfileActivity.class);
             intent.putExtra("visitReason", "edit");
@@ -85,7 +92,6 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
 
         });
-
 
 
         KarmaPage.setOnClickListener(v -> {
@@ -136,22 +142,20 @@ public class DashboardActivity extends AppCompatActivity {
 //        }
 
 
-
         sign_out.setOnClickListener(view -> signOut());
     }
 
     private void signOut() {
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this, task -> {
-                    Toast.makeText(DashboardActivity.this,"Successfully Signed Out !!!",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DashboardActivity.this, "Successfully Signed Out !!!", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(DashboardActivity.this, MainActivity.class));
                     finish();
                 });
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         super.onBackPressed();
 //        startActivity(new Intent(DashboardActivity.this, MainActivity.class));
         moveTaskToBack(true);
@@ -172,20 +176,24 @@ public class DashboardActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String baseUrl = getResources().getString(R.string.base_url)+ "/api/users/" + userId;
+        String baseUrl = getResources().getString(R.string.base_url) + "/api/users/" + userId;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, baseUrl, object,
-                response -> {
-                    Log.w("ServerResponse", response.toString());
+                                                                    response -> {
+                                                                        Log.w("ServerResponse", response.toString());
 
-                    try {
-                        JSONObject respObj = new JSONObject(response.getString("user"));
+                                                                        try {
+                                                                            JSONObject respObj = new JSONObject(
+                                                                                    response.getString("user"));
 
 
 //                        Toast.makeText(DashboardActivity.this, response.getString("name"), Toast.LENGTH_SHORT).show();
-                        nameTV.setText(respObj.getString("name"));
+                                                                            nameTV.setText(respObj.getString("name"));
 //                        emailTV.setText(respObj.getString("email"));
-                        String profilePictureUrl = respObj.getString("profilePicture");
-                        Picasso.get().load(profilePictureUrl).fit().centerInside().into(displayImage);
+                                                                            String profilePictureUrl = respObj.getString(
+                                                                                    "profilePicture");
+                                                                            Picasso.get().load(
+                                                                                    profilePictureUrl).fit().centerInside().into(
+                                                                                    displayImage);
 
 //                            editTextUsername.setText(response.getString("name"));
 //                            editTextEmail.setText(response.getString("email"));
@@ -193,15 +201,15 @@ public class DashboardActivity extends AppCompatActivity {
 //                            editTextLocation.setText(response.getString("changedLocation"));
 //                            editTextRadius.setText(response.getString("changedRadius"));
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                                                                        } catch (JSONException e) {
+                                                                            e.printStackTrace();
+                                                                        }
 
 
-                }, error -> {
-                    Log.w("ServerError", error);
+                                                                    }, error -> {
+            Log.w("ServerError", error);
 
-                }){
+        }) {
             /** Passing some request headers* */
             @Override
             public Map getHeaders() throws AuthFailureError {
@@ -213,5 +221,81 @@ public class DashboardActivity extends AppCompatActivity {
         };
 
         requestQueue.add(jsonObjectRequest);
+    }
+
+    private MFPPushNotificationListener createNotificationListener() {
+        return new MFPPushNotificationListener() {
+            @Override
+            public void onReceive(final MFPSimplePushNotification message) {
+                Log.i(TAG, "Received a Push Notification: " + message.toString());
+                Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),
+                                                                                    getString(R.string.notification_channel_id))
+                        .setSmallIcon(R.drawable.gift)
+                        .setContentTitle("Friendly Neighbor")
+                        .setContentText(message.getAlert())
+                        .setPriority(NotificationCompat.PRIORITY_MAX)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setLargeIcon(
+                                BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.gift))
+                        // Set the intent that will fire when the user taps the notification
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true);
+
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
+
+                int id = (int) System.currentTimeMillis();
+                notificationManager.notify(id, builder.build());
+            }
+        };
+    }
+
+    private void initNotifications() {
+        // Initialize the Push notif SDK
+        BMSClient.getInstance().initialize(this, BMSClient.REGION_SYDNEY);
+
+        push = MFPPush.getInstance();
+        push.initialize(getApplicationContext(),
+                        getString(R.string.ibm_push_app_guid),
+                        getString(R.string.ibm_push_client_secret));
+
+    }
+
+    private void registerNotifications(String userId) {
+        /* For user-sepcific notifications*/
+        push.registerDeviceWithUserId(userId, new MFPPushResponseListener<String>() {
+            @Override
+            public void onSuccess(String response) {
+                Log.i(TAG, "Registered user: " + userId + " for specific notifications");
+            }
+
+            @Override
+            public void onFailure(MFPPushException ex) {
+                Log.i(TAG, "Failed user registration user: " + userId + ex.getErrorMessage());
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (push != null) {
+            push.listen(notificationListener);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (push != null) {
+            push.hold();
+        }
     }
 }
