@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "446233480022",
+    "firebase_url": "https://fn-2020.firebaseio.com",
+    "project_id": "fn-2020",
+    "storage_bucket": "fn-2020.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:446233480022:android:e82edd50e7db0eacd124f7",
+        "android_client_info": {
+          "package_name": "me.twodee.friendlyneighbor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "446233480022-6amk4h0iubamhsvgdm12l82f0efc3te7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdlrMIkMq-KLrP8TS47VU2LfqruJndJas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "446233480022-6amk4h0iubamhsvgdm12l82f0efc3te7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

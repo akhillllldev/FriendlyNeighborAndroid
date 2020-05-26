@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -83,5 +84,20 @@ dependencies {
 
     //Onboarding
     implementation 'com.github.AppIntro:AppIntro:6.0.0'
+
+    // Google analytics
+    implementation 'com.google.firebase:firebase-analytics:17.4.2'
+
+    // Push notifs
+    implementation 'com.google.firebase:firebase-messaging:20.2.0'
+    implementation group: 'com.ibm.mobilefirstplatform.clientsdk.android',
+            name: 'push',
+            version: '4.3.0',
+            ext: 'aar',
+            transitive: true
+
+    implementation 'com.ibm.mobilefirstplatform.clientsdk.android:core:3.1.7'
+    // https://mvnrepository.com/artifact/com.ibm.mobile.foundation/ibmmobilefirstplatformfoundationpush
+    //implementation group: 'com.ibm.mobile.foundation', name: 'ibmmobilefirstplatformfoundationpush', version: '8.0.2020022806'
 
 }
